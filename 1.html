@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Appointment Booking App</h1>
+
+    <form>
+        Name: <input type="text" id="name" >
+        Email Id: <input type="text" id="email" >
+        Mobile No: <input type="text" id="mobile" >
+        <button type="button" onclick="addUser()">Submit</button>
+    </form>
+
+    <ul id="users-list"></ul>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.3/axios.min.js"></script>
+
+    <script>
+
+        //----------Displaying earlier saved Users Data in the backend on the page when you refresh the page.
+        
+        window.addEventListener("DOMContentLoaded" , () => {
+            axios
+                .get('https://crudcrud.com/api/0508b66e900e423c9d725aba74d1735d/appointmentData')
+                .then((response) => {
+                    // console.log(response.data);
+                    // console.log(response.data[6].Name);
+
+                    //Now displaying the user data from the server on the page.
+                    
+                     for(let i=0;i<response.data.length;i++)
+                     {
+                        displayInputFromUser(response);  
+                        console.log(response.data[i]);
+                     }
+                    
+
+
+
+
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
+        } );
+
+        
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //--------------Adding User i.e Creating Object which contains user data filled by client.
+        
+        function addUser () {
+        let name = document.getElementById('name').value;
+        let email = document.getElementById('email').value;
+        let mobile = document.getElementById('mobile').value;
+
+        const userDetail = {
+            Name: name,
+            Email: email,
+            Mobile : mobile, 
+        }
+
+          
+        //----------Storing/Postign the Object Created Above into backend (crud-crud k server pe)
+
+        axios
+        .post("https://crudcrud.com/api/0508b66e900e423c9d725aba74d1735d/appointmentData" , userDetail)
+        .then((response) => { 
+            console.log(response.data);
+            console.log(response.data.Name);
+            console.log(response.data.Email);
+            console.log(response.data.Mobile);
+
+            //Also Displaying the user data on Page with EDIT and DELETE Functionality
+            displayInputFromUser(response);
+
+         })
+        .catch((error) => { 
+            console.log(error);
+            //Also Displaying Error on web Page
+            let ul = document.getElementById('users-list');     
+            let li = document.createElement('li');
+            ul.appendChild(li);
+            li.innerHTML = 'Error in Submitting Data';
+         });
+
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //----------Function for Dispalying User Data on Page with EDIT & DELETE Button and functionality
+        
+    function displayInputFromUser (response) {
+       
+       //Making lists so that age chal k is list me entered data ko display kar paye page pe.
+       let ul = document.getElementById('users-list');     
+       let li = document.createElement('li');
+       ul.appendChild(li);
+
+       //For Displaying on Page
+       li.innerHTML = `${response.data.Name} , ${response.data.Email} , ${response.data.Mobile}`;
+       
+       //For Editing User
+       let editBtn = document.createElement('button');
+       editBtn.type = 'button';
+       editBtn.innerHTML = 'EDIT';
+       editBtn.addEventListener("click" , editThisKey);
+      
+       //For Deleting User
+       let deleteBtn = document.createElement('button');
+       deleteBtn.type = 'button' ;
+       deleteBtn.innerHTML = 'DELETE' ; 
+       deleteBtn.addEventListener("click", deleteThisKey);
+
+       //Now Appending Everyting at their repective place
+       li.appendChild(editBtn);
+       li.appendChild(deleteBtn);
+
+       //Now Creating Functions for Edit Button and Delete Button
+       
+       function editThisKey() {
+           //Showing User Details on respective input field so that user can directly edit there. 
+           document.getElementById('name').value = name;
+           document.getElementById('email').value = email;
+           document.getElementById('mobile').value = mobile;
+
+           //Now Delete the user detail so that when he click on submit button a new details get stored
+           deleteThisKey();
+       }
+       
+       function deleteThisKey() {
+           localStorage.removeItem(email);
+           ul.removeChild(li);
+       }
+
+   }
+
+
+
+</script>
+</body>
+</html>
